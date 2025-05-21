@@ -1,3 +1,19 @@
+This is a simple fork of "C# for Visual Studio Code" that only enables the debugger of C#; and not the OmniSharp or Roslyn server.
+
+The use case for me was that I wanted to use ReSharper in VSCode and debug an WebForms application in IIS Express.
+
+How to install the extension:
+
+1. Clone the solution
+2. Install the NPM packages: `npm install` (must be NPM!)
+3. Create the package: `npx gulp vsix:release:package`
+4. Install the extension in VSCode (F1 > `Extensions: Install from VSIX...`)
+5. Select the VSIX in the `vsix`-folder
+
+Have fun debugging!
+
+---
+
 ## C# for Visual Studio Code
 A [Visual Studio Code](https://code.visualstudio.com/) [extension](https://marketplace.visualstudio.com/VSCode) that provides rich language support for C# and is shipped along with [C# Dev Kit][csdevkitextension]. Powered by a Language Server Protocol (LSP) server, this extension integrates with open source components like [Roslyn](https://github.com/dotnet/roslyn) and [Razor](https://github.com/dotnet/razor) to provide rich type information and a faster, more reliable C# experience.
 

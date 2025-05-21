@@ -14,7 +14,6 @@ import { EventStream } from './eventStream';
 import { PlatformInformation } from './shared/platform';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { vscodeNetworkSettingsProvider } from './networkSettings';
-import createOptionStream from './shared/observables/createOptionStream';
 import { AbsolutePathPackage } from './packageManager/absolutePathPackage';
 import { downloadAndInstallPackages } from './packageManager/downloadAndInstallPackages';
 import IInstallDependencies from './packageManager/IInstallDependencies';
@@ -27,8 +26,6 @@ import { commonOptions, omnisharpOptions } from './shared/options';
 import { TelemetryEventNames } from './shared/telemetryEventNames';
 import { checkDotNetRuntimeExtensionVersion } from './checkDotNetRuntimeExtensionVersion';
 import { checkIsSupportedPlatform } from './checkSupportedPlatform';
-import { activateOmniSharp } from './activateOmniSharp';
-import { activateRoslyn } from './activateRoslyn';
 
 export async function activate(
     context: vscode.ExtensionContext
@@ -68,15 +65,11 @@ export async function activate(
     await checkDotNetRuntimeExtensionVersion(context);
 
     await MigrateOptions(vscode);
-    const optionStream = createOptionStream(vscode);
 
     const requiredPackageIds: string[] = ['Debugger', 'Razor'];
 
     const csharpDevkitExtension = getCSharpDevKit();
     const useOmnisharpServer = !csharpDevkitExtension && commonOptions.useOmnisharpServer;
-    if (useOmnisharpServer) {
-        requiredPackageIds.push('OmniSharp');
-    }
 
     const networkSettingsProvider = vscodeNetworkSettingsProvider(vscode);
     const useFramework = useOmnisharpServer && omnisharpOptions.useModernNet !== true;
@@ -110,30 +103,7 @@ export async function activate(
         return coreClrDebugPromise;
     };
 
-    let exports: CSharpExtensionExports | OmnisharpExtensionExports;
-    if (!useOmnisharpServer) {
-        exports = activateRoslyn(
-            context,
-            platformInfo,
-            optionStream,
-            eventStream,
-            csharpChannel,
-            reporter,
-            csharpDevkitExtension,
-            getCoreClrDebugPromise
-        );
-    } else {
-        exports = activateOmniSharp(
-            context,
-            platformInfo,
-            optionStream,
-            networkSettingsProvider,
-            eventStream,
-            csharpChannel,
-            reporter,
-            getCoreClrDebugPromise
-        );
-    }
+    await getCoreClrDebugPromise(Promise.resolve());
 
     const timeTaken = process.hrtime(startActivation);
     const timeTakenStr = (timeTaken[0] * 1000 + timeTaken[1] / 1000000).toFixed(3);
@@ -144,5 +114,5 @@ export async function activate(
     };
     reporter.sendTelemetryEvent(TelemetryEventNames.CSharpActivated, activationProperties);
 
-    return exports;
+    return null;
 }
